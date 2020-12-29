@@ -24,15 +24,25 @@ from opencensus.ext.flask.flask_middleware import FlaskMiddleware
 logger = # TODO: Setup logger
 
 # Metrics
-exporter = # TODO: Setup exporter
+exporter = metrics_exporter.new_metrics_exporter(
+  enable_standard_metrics=True,
+  connection_string='InstrumentationKey=a3c02274-4711-4f15-b766-d4a88a4f830e;IngestionEndpoint=https://westus2-1.in.applicationinsights.azure.com/')
 
 # Tracing
-tracer = # TODO: Setup tracer
+tracer = Tracer(
+    exporter=AzureExporter(
+        connection_string='InstrumentationKey=a3c02274-4711-4f15-b766-d4a88a4f830e;IngestionEndpoint=https://westus2-1.in.applicationinsights.azure.com/'),
+    sampler=ProbabilitySampler(1.0),
+)
 
 app = Flask(__name__)
 
 # Requests
-middleware = # TODO: Setup flask middleware
+middleware = FlaskMiddleware(
+    app,
+    exporter=AzureExporter(connection_string="InstrumentationKey=a3c02274-4711-4f15-b766-d4a88a4f830e;IngestionEndpoint=https://westus2-1.in.applicationinsights.azure.com/"),
+    sampler=ProbabilitySampler(rate=1.0),
+)
 
 # Load configurations from environment or config file
 app.config.from_pyfile('config_file.cfg')
