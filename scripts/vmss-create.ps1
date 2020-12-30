@@ -1,0 +1,16 @@
+az vmss create `
+--resource-group udacity-c4-project `
+--name rp2021-vmss `
+--image UbuntuLTS `
+--vm-sku Standard_B2s `
+--nsg rp28253-vmss-nsg `
+--subnet rp28253-vmss-vnet-subnet `
+--vnet-name rp28253-vmss-vnet `
+--backend-pool-name rp28253-vmss-bepool `
+--storage-sku Standard_LRS `
+--load-balancer rp28253-vmss-lb `
+--custom-data cloud-init.txt `
+--upgrade-policy-mode automatic `
+--admin-username udacityadmin `
+--generate-ssh-keys `
+  --verbose
