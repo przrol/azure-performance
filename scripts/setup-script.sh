@@ -2,9 +2,9 @@
 
 # Variables
 resourceGroup="rp-c4-project"
-location="eastus2"
+location="eastus"
 osType="UbuntuLTS"
-vmssName="rp-vmss"
+vmssName="rp$RANDOM-vmss"
 adminName="udacityadmin"
 storageAccount="udacitydiag$RANDOM"
 bePoolName="$vmssName-bepool"
