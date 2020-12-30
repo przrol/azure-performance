@@ -26,12 +26,12 @@ logger = logging.getLogger(__name__)
 # Metrics
 exporter = metrics_exporter.new_metrics_exporter(
   enable_standard_metrics=True,
-  connection_string='InstrumentationKey=fd51de06-3c1f-4ff3-9ede-03864fe44bd2;IngestionEndpoint=https://eastus2-0.in.applicationinsights.azure.com/')
+  connection_string='InstrumentationKey=361f7b58-d0a0-4da8-a648-5b1559d163c8;IngestionEndpoint=https://westus2-1.in.applicationinsights.azure.com/')
 
 # Tracing
 tracer = Tracer(
     exporter=AzureExporter(
-        connection_string='InstrumentationKey=fd51de06-3c1f-4ff3-9ede-03864fe44bd2;IngestionEndpoint=https://eastus2-0.in.applicationinsights.azure.com/'),
+        connection_string='InstrumentationKey=361f7b58-d0a0-4da8-a648-5b1559d163c8;IngestionEndpoint=https://westus2-1.in.applicationinsights.azure.com/'),
     sampler=ProbabilitySampler(1.0),
 )
 
@@ -40,7 +40,7 @@ app = Flask(__name__)
 # Requests
 middleware = FlaskMiddleware(
     app,
-    exporter=AzureExporter(connection_string="InstrumentationKey=fd51de06-3c1f-4ff3-9ede-03864fe44bd2;IngestionEndpoint=https://eastus2-0.in.applicationinsights.azure.com/"),
+    exporter=AzureExporter(connection_string="InstrumentationKey=361f7b58-d0a0-4da8-a648-5b1559d163c8;IngestionEndpoint=https://westus2-1.in.applicationinsights.azure.com/"),
     sampler=ProbabilitySampler(rate=1.0),
 )
 
