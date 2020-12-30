@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Variables
-resourceGroup="rp-c4-project"
-location="eastus"
+resourceGroup="udacity-c4-project"
+location="westus2"
 osType="UbuntuLTS"
 vmssName="rp$RANDOM-vmss"
 adminName="udacityadmin"
