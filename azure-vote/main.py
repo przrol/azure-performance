@@ -9,6 +9,7 @@ from datetime import datetime
 
 # App Insights
 from opencensus.ext.azure.log_exporter import AzureLogHandler
+from opencensus.ext.azure.log_exporter import AzureEventHandler
 from opencensus.ext.azure import metrics_exporter
 from opencensus.stats import aggregation as aggregation_module
 from opencensus.stats import measure as measure_module
@@ -22,9 +23,8 @@ from opencensus.ext.flask.flask_middleware import FlaskMiddleware
 
 # Logging
 logger = logging.getLogger(__name__)
-logger.addHandler(AzureLogHandler(
-    connection_string='InstrumentationKey=361f7b58-d0a0-4da8-a648-5b1559d163c8')
-)
+logger.addHandler(AzureLogHandler(connection_string='InstrumentationKey=361f7b58-d0a0-4da8-a648-5b1559d163c8'))
+logger.addHandler(AzureEventHandler(connection_string='InstrumentationKey=361f7b58-d0a0-4da8-a648-5b1559d163c8'))
 logger.setLevel(logging.INFO)
 
 # Metrics
@@ -86,7 +86,7 @@ def index():
         vote1 = r.get(button1).decode('utf-8')
         with tracer.span(name="cats"):
             logger.warning('In the cats span')
-            
+
         vote2 = r.get(button2).decode('utf-8')
         with tracer.span(name="dogs"):
             logger.warning('In the dogs span')
