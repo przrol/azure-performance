@@ -21,32 +21,7 @@ from opencensus.trace.samplers import ProbabilitySampler
 from opencensus.trace.tracer import Tracer
 from opencensus.ext.flask.flask_middleware import FlaskMiddleware
 
-# Logging
-logger = logging.getLogger(__name__)
-logger.addHandler(AzureLogHandler(connection_string='InstrumentationKey=361f7b58-d0a0-4da8-a648-5b1559d163c8'))
-logger.addHandler(AzureEventHandler(connection_string='InstrumentationKey=361f7b58-d0a0-4da8-a648-5b1559d163c8'))
-logger.setLevel(logging.INFO)
-
-# Metrics
-exporter = metrics_exporter.new_metrics_exporter(
-  enable_standard_metrics=True,
-  connection_string='InstrumentationKey=361f7b58-d0a0-4da8-a648-5b1559d163c8')
-
-# Tracing
-tracer = Tracer(
-    exporter=AzureExporter(
-        connection_string='InstrumentationKey=361f7b58-d0a0-4da8-a648-5b1559d163c8'),
-    sampler=ProbabilitySampler(1.0),
-)
-
 app = Flask(__name__)
-
-# Requests
-middleware = FlaskMiddleware(
-    app,
-    exporter=AzureExporter(connection_string="InstrumentationKey=361f7b58-d0a0-4da8-a648-5b1559d163c8"),
-    sampler=ProbabilitySampler(rate=1.0),
-)
 
 # Load configurations from environment or config file
 app.config.from_pyfile('config_file.cfg')
@@ -65,6 +40,42 @@ if ("TITLE" in os.environ and os.environ['TITLE']):
     title = os.environ['TITLE']
 else:
     title = app.config['TITLE']
+
+if ("INSTRUMENTATIONKEY" in os.environ and os.environ['INSTRUMENTATIONKEY']):
+    instrumentationkey = os.environ['INSTRUMENTATIONKEY']
+else:
+    instrumentationkey = app.config['INSTRUMENTATIONKEY']
+
+
+# Logging
+trace_logger = logging.getLogger(f'{__name__}.trace')
+trace_logger.addHandler(AzureLogHandler(connection_string=f'InstrumentationKey={instrumentationkey}'))
+trace_logger.setLevel(logging.INFO)
+
+event_logger = logging.getLogger(f'{__name__}.event')
+event_logger.addHandler(AzureLogHandler(connection_string=f'InstrumentationKey={instrumentationkey}'))
+event_logger.addHandler(AzureEventHandler(connection_string=f'InstrumentationKey={instrumentationkey}'))
+event_logger.setLevel(logging.INFO)
+
+# Metrics
+exporter = metrics_exporter.new_metrics_exporter(
+  enable_standard_metrics=True,
+  connection_string=f'InstrumentationKey={instrumentationkey}')
+
+# Tracing
+tracer = Tracer(
+    exporter=AzureExporter(
+        connection_string=f'InstrumentationKey={instrumentationkey}'),
+    sampler=ProbabilitySampler(1.0),
+)
+
+# Requests
+middleware = FlaskMiddleware(
+    app,
+    exporter=AzureExporter(connection_string=f"InstrumentationKey={instrumentationkey}"),
+    sampler=ProbabilitySampler(rate=1.0),
+)
+
 
 # Redis Connection
 r = redis.Redis()
@@ -101,11 +112,11 @@ def index():
             r.set(button2,0)
             vote1 = r.get(button1).decode('utf-8')
             properties = {'custom_dimensions': {'Cats Vote': vote1}}
-            logger.info('reset cats votes', extra=properties)
+            trace_logger.info('reset cats votes', extra=properties)
 
             vote2 = r.get(button2).decode('utf-8')
             properties = {'custom_dimensions': {'Dogs Vote': vote2}}
-            logger.info('reset dogs votes', extra=properties)
+            trace_logger.info('reset dogs votes', extra=properties)
 
             return render_template("index.html", value1=int(vote1), value2=int(vote2), button1=button1, button2=button2, title=title)
 
@@ -114,6 +125,7 @@ def index():
             # Insert vote result into DB
             vote = request.form['vote']
             r.incr(vote,1)
+            event_logger.info(f'{vote} clicked')
 
             # Get current values
             vote1 = r.get(button1).decode('utf-8')
