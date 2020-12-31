@@ -22,10 +22,10 @@ from opencensus.ext.flask.flask_middleware import FlaskMiddleware
 
 # Logging
 logger = logging.getLogger(__name__)
-
 logger.addHandler(AzureLogHandler(
     connection_string='InstrumentationKey=361f7b58-d0a0-4da8-a648-5b1559d163c8')
 )
+logger.setLevel(logging.INFO)
 
 # Metrics
 exporter = metrics_exporter.new_metrics_exporter(
@@ -84,9 +84,12 @@ def index():
 
         # Get current values
         vote1 = r.get(button1).decode('utf-8')
-        tracer.span(name="cats current values")
+        with tracer.span(name="cats"):
+            logger.warning('In the cats span')
+            
         vote2 = r.get(button2).decode('utf-8')
-        tracer.span(name="dogs current values")
+        with tracer.span(name="dogs"):
+            logger.warning('In the dogs span')
 
         # Return index with values
         return render_template("index.html", value1=int(vote1), value2=int(vote2), button1=button1, button2=button2, title=title)
